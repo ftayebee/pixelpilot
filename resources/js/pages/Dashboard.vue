@@ -1,16 +1,21 @@
 <script setup lang="ts">
-import { Head, Link, usePage } from '@inertiajs/vue3';
+import EmptyState from '@/components/EmptyState.vue';
+import PageHeader from '@/components/PageHeader.vue';
+import AppLayout from '@/layouts/AppLayout.vue';
+import { Head, usePage } from '@inertiajs/vue3';
+import { ImagePlus } from 'lucide-vue-next';
+import { computed } from 'vue';
 
 const page = usePage();
+const firstName = computed(() => page.props.auth.user?.name.split(' ')[0] ?? '');
 </script>
 
 <template>
     <Head title="Overview" />
-    <main class="flex min-h-screen items-center justify-center p-6">
-        <div class="card w-full max-w-md p-8">
-            <p class="text-sm text-muted">Signed in as</p>
-            <p class="mt-1 font-medium">{{ page.props.auth.user?.email }}</p>
-            <Link :href="route('logout')" method="post" as="button" class="mt-6 text-sm font-medium text-brand-600">Sign out</Link>
+    <AppLayout>
+        <PageHeader :title="`Hi, ${firstName}`" description="Here's what's happening in your studio." />
+        <div class="card">
+            <EmptyState :icon="ImagePlus" title="No generations yet" description="Your activity and spending will appear here once you create your first image." />
         </div>
-    </main>
+    </AppLayout>
 </template>
