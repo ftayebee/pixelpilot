@@ -5,7 +5,7 @@ namespace App\Services\Generations;
 use App\Enums\GenerationStatus;
 use App\Models\Generation;
 use App\Services\Pixelforge\Data\ProviderGeneration;
-use App\Services\Pricing\PricingService;
+use App\Services\Pricing\ChargeRecorder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -24,7 +24,7 @@ use Illuminate\Support\Facades\Log;
  */
 class GenerationSynchronizer
 {
-    public function __construct(private readonly PricingService $pricing) {}
+    public function __construct(private readonly ChargeRecorder $charges) {}
 
     /**
      * @return bool whether anything changed
@@ -109,25 +109,9 @@ class GenerationSynchronizer
 
     private function markSucceeded(Generation $generation, ProviderGeneration $snapshot): void
     {
-        $usage = $snapshot->usage;
-        $rates = $snapshot->rates !== [] ? $snapshot->rates : (array) $generation->rates;
-
-        $cost = $this->pricing->cost([
-            'input_text_tokens' => $usage['input_text_tokens'],
-            'input_image_tokens' => $usage['input_image_tokens'],
-            'output_tokens' => $usage['output_tokens'],
-            'reasoning_tokens' => $usage['reasoning_tokens'],
-        ], $rates);
+        $this->charges->record($generation, $snapshot);
 
         $generation->forceFill([
-            'input_text_tokens' => $usage['input_text_tokens'],
-            'input_image_tokens' => $usage['input_image_tokens'],
-            'output_tokens' => $usage['output_tokens'],
-            'reasoning_tokens' => $usage['reasoning_tokens'],
-            'rates' => $rates,
-            'actual_cost' => $cost,
-            'actual_charge' => $this->pricing->charge($cost),
-            'charged_at' => now(),
             'started_at' => $generation->started_at ?? $snapshot->startedAt,
             'completed_at' => $snapshot->completedAt ?? now(),
             'error_code' => null,
