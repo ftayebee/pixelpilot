@@ -1,8 +1,6 @@
 <?php
 
-use Illuminate\Foundation\Inspiring;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
 
-Artisan::command('inspire', function () {
-    $this->comment(Inspiring::quote());
-})->purpose('Display an inspiring quote');
+// Webhook events that were stored but never processed (queue outage, crash).
+Schedule::command('pixelforge:process-pending-webhooks')->everyFiveMinutes()->withoutOverlapping();
