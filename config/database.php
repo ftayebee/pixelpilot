@@ -97,6 +97,8 @@ return [
             'prefix_indexes' => true,
             'search_path' => 'public',
             'sslmode' => env('DB_SSLMODE', 'prefer'),
+            // Laravel writes timestamps in UTC; the session must agree or timestamptz columns shift.
+            'timezone' => 'UTC',
         ],
 
         'sqlsrv' => [

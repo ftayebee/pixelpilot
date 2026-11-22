@@ -42,9 +42,13 @@ class GenerationSubmitter
 
         $this->synchronizer->apply($generation, $result['generation'], 'create');
 
-        $generation->forceFill([
-            'next_poll_at' => now()->addSeconds(config('pixelforge.polling.first_after_seconds')),
-        ])->save();
+        // Webhooks should arrive first; this is when the poller checks if they haven't.
+        if ($generation->status->isPending()) {
+            $generation->forceFill([
+                'next_poll_at' => now()->addSeconds(config('pixelforge.polling.first_after_seconds')),
+                'poll_attempts' => 0,
+            ])->save();
+        }
 
         return SubmissionResult::accepted();
     }
@@ -54,6 +58,9 @@ class GenerationSubmitter
         if ($e->isRetryable() && $generation->submit_attempts < self::MAX_ATTEMPTS) {
             $delay = $this->retryDelay($generation->submit_attempts, $e->retryAfter);
             SubmitGeneration::dispatch($generation->id)->delay(now()->addSeconds($delay));
+
+            // Safety net: if that job is lost, the poller re-submits (same key) a bit later.
+            $generation->forceFill(['next_poll_at' => now()->addSeconds($delay + 120)])->save();
 
             return SubmissionResult::retrying($e->userMessage(), $delay);
         }

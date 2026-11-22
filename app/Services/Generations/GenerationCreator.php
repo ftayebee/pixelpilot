@@ -53,6 +53,8 @@ class GenerationCreator
                 'size' => $input['size'],
                 'quality' => $input['quality'],
                 'reference_images' => array_values($input['reference_images']),
+                // If the request dies before submitting, the poller picks this up.
+                'next_poll_at' => now()->addMinutes(2),
                 ...$this->estimateAttributes($estimate),
             ]));
         } catch (UniqueConstraintViolationException) {
