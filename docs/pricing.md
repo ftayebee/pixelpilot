@@ -73,3 +73,26 @@ The database constraints mean a bug in application code produces a failed transa
 | One text token | 1 / 0 / 0 / 0 | $0.000005 | $0.00000625 |
 | Three reasoning tokens | 0 / 0 / 0 / 3 | $0.0000375 | $0.000046875 |
 | Failed | — | $0 | $0 |
+
+## Credits (balances)
+
+Credits are US dollars. Everything goes through `App\Services\Credits\CreditLedger`.
+
+**Ledger.** `credit_transactions` is append-only (a trigger rejects UPDATE and DELETE). Every row has a unique reference, user, type, signed amount, the balance after it, an optional generation and a description. `users.credit_balance` is a running total updated in the same transaction as each row, under a `SELECT … FOR UPDATE` lock on the user, so it always equals the sum of the user's ledger (asserted in the tests).
+
+**Buying.** "Buy credits" is a simulated purchase, labelled as such in the UI and on the ledger row. The form's request id becomes the ledger reference, so a double submit adds credits once.
+
+**Reserve → settle.**
+
+| Event | Ledger | Net effect |
+|---|---|---|
+| Generation created | `reservation` of the **maximum** estimated charge | balance − max |
+| Can't afford the maximum | nothing; the generation isn't created and nothing is sent to Pixelforge | — |
+| Failed / rejected / abandoned | `release` of the reservation | back to where it was |
+| Succeeded | `release` of the reservation, then `charge` of the **actual** charge | balance − actual |
+
+The reservation and the generation row are written in one transaction, so a generation can't exist without its credits set aside, and two generations can't both reserve the same money. A partial unique index allows at most one `reservation`, `release` and `charge` per generation, which makes retries and duplicate webhooks harmless.
+
+The reservation is the top of the estimate range, so the user's balance never has to cover more than what they were shown. Because the estimate covers the full documented token ranges, the actual charge can't exceed it at Pixelforge's documented rules (a property test checks 2,000 random requests).
+
+**Shortfall policy.** If Pixelforge ever billed more than the documented maximum (a provider bug or an undocumented change), we still record the **true** charge, because money must match the provider. When the balance can't cover the difference, the `charge` row carries a `shortfall` amount, a warning is logged, the balance shows as negative with an explanation, and the user can't start another generation until they top up. Nothing about it is silent.

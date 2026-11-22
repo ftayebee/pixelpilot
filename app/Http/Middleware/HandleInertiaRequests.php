@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Support\Money;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -27,6 +28,7 @@ class HandleInertiaRequests extends Middleware
                     'name' => $user->name,
                     'email' => $user->email,
                     'is_admin' => $user->isAdmin(),
+                    'credit_balance' => Money::normalize((string) $user->credit_balance),
                 ] : null,
             ],
             'flash' => [

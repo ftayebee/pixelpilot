@@ -27,7 +27,7 @@ class GenerationWorkflowTest extends TestCase
     {
         parent::setUp();
         Sleep::fake();
-        $this->user = User::factory()->create();
+        $this->user = User::factory()->withCredits('10')->create();
     }
 
     /**

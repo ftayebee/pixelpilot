@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import BrandMark from '@/components/BrandMark.vue';
 import UserMenu from '@/components/UserMenu.vue';
+import { formatUsd } from '@/lib/format';
 import { Link, usePage } from '@inertiajs/vue3';
 import { ChartNoAxesCombined, GalleryVerticalEnd, LayoutGrid, Settings, Sparkles, WalletCards, X } from 'lucide-vue-next';
 import type { Component } from 'vue';
@@ -82,6 +83,13 @@ function isActive(item: NavItem) {
                         >
                             <component :is="item.icon" class="size-[18px]" :class="isActive(item) ? 'text-white' : 'text-muted group-hover:text-brand-600'" />
                             {{ item.label }}
+                            <span
+                                v-if="item.route === 'credits.index' && page.props.auth.user"
+                                class="tabular ml-auto text-xs"
+                                :class="isActive(item) ? 'text-white/80' : 'text-muted'"
+                            >
+                                {{ formatUsd(page.props.auth.user.credit_balance) }}
+                            </span>
                         </Link>
                     </li>
                 </ul>

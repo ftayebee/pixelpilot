@@ -4,6 +4,7 @@ namespace App\Services\Generations;
 
 use App\Enums\GenerationStatus;
 use App\Models\Generation;
+use App\Services\Credits\CreditLedger;
 use App\Services\Pixelforge\PixelforgeClient;
 use App\Services\Pixelforge\PixelforgeException;
 use Illuminate\Support\Collection;
@@ -138,6 +139,8 @@ class GenerationPoller
                 'completed_at' => now(),
                 'next_poll_at' => null,
             ])->save();
+
+            app(CreditLedger::class)->release($locked);
         });
 
         Log::warning('Gave up waiting for a generation.', ['generation' => $generation->uuid]);

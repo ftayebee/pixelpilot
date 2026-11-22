@@ -5,6 +5,7 @@ namespace App\Services\Generations;
 use App\Enums\GenerationStatus;
 use App\Jobs\StoreGenerationImage;
 use App\Models\Generation;
+use App\Services\Credits\CreditLedger;
 use App\Services\Pixelforge\Data\ProviderGeneration;
 use App\Services\Pricing\ChargeRecorder;
 use Illuminate\Support\Facades\DB;
@@ -28,6 +29,7 @@ class GenerationSynchronizer
     public function __construct(
         private readonly ChargeRecorder $charges,
         private readonly GenerationImages $images,
+        private readonly CreditLedger $credits,
     ) {}
 
     /**
@@ -127,6 +129,7 @@ class GenerationSynchronizer
     private function markSucceeded(Generation $generation, ProviderGeneration $snapshot): void
     {
         $this->charges->record($generation, $snapshot);
+        $this->credits->settle($generation, $generation->actual_charge);
 
         $generation->forceFill([
             'started_at' => $generation->started_at ?? $snapshot->startedAt,
@@ -148,6 +151,8 @@ class GenerationSynchronizer
             'started_at' => $generation->started_at ?? $snapshot->startedAt,
             'completed_at' => $snapshot->completedAt ?? now(),
         ]);
+
+        $this->credits->release($generation);
     }
 
     private function refreshImage(Generation $generation, ProviderGeneration $snapshot): bool

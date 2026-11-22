@@ -3,6 +3,7 @@ export interface AuthUser {
     name: string;
     email: string;
     is_admin: boolean;
+    credit_balance: string;
 }
 
 export interface SharedProps {

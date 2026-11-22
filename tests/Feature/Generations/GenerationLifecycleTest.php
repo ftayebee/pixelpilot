@@ -30,7 +30,7 @@ class GenerationLifecycleTest extends TestCase
     {
         parent::setUp();
         Sleep::fake();
-        $this->user = User::factory()->create();
+        $this->user = User::factory()->withCredits('10')->create();
         // Each create returns a new Pixelforge id; the first matches the webhook fixtures.
         $creates = 0;
         Http::fake([

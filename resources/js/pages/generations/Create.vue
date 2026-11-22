@@ -10,7 +10,8 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { formatNumber, formatUsd } from '@/lib/format';
 import { characterCount, qualityLabels, sizeLabels } from '@/lib/generation';
 import type { Estimate, GenerationSummary } from '@/types/generation';
-import { Head, Link, router, useForm } from '@inertiajs/vue3';
+import { compareDecimal } from '@/lib/decimal';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
 import { CloudOff, Eraser, ImagePlus, Sparkles } from 'lucide-vue-next';
 import { computed, onBeforeUnmount, ref, useId, watch } from 'vue';
 
@@ -108,7 +109,15 @@ onBeforeUnmount(() => {
     estimateController?.abort();
 });
 
-const canSubmit = computed(() => !!props.options && characters.value > 0 && !overLimit.value && !form.processing && !estimateError.value);
+const page = usePage();
+const balance = computed(() => page.props.auth.user?.credit_balance ?? '0');
+const creditsError = computed(() => (form.errors as Record<string, string | undefined>).credits);
+// The server makes the real decision; this only saves a pointless round trip.
+const cannotAfford = computed(() => !!estimate.value && compareDecimal(balance.value, estimate.value.charge_max) < 0);
+
+const canSubmit = computed(
+    () => !!props.options && characters.value > 0 && !overLimit.value && !form.processing && !estimateError.value && !cannotAfford.value,
+);
 
 function submit() {
     if (!canSubmit.value) return;
@@ -232,6 +241,16 @@ const referenceErrors = computed(() => {
                         :errors="referenceErrors"
                     />
                 </section>
+
+                <div
+                    v-if="cannotAfford || creditsError"
+                    class="flex flex-col gap-2 rounded-[var(--radius-control)] bg-warning-soft px-4 py-3 text-sm text-[#8a5300] sm:flex-row sm:items-center sm:justify-between"
+                    role="alert"
+                >
+                    <span v-if="creditsError">{{ creditsError }}</span>
+                    <span v-else>Your balance is {{ formatUsd(balance) }} and this image can cost up to {{ formatUsd(estimate?.charge_max) }}.</span>
+                    <Link :href="route('credits.index')" class="font-medium whitespace-nowrap underline">Add credits</Link>
+                </div>
 
                 <div class="flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div class="text-xs text-muted">

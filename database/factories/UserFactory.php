@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\User;
+use App\Services\Credits\CreditLedger;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -36,6 +37,14 @@ class UserFactory extends Factory
     /**
      * Indicate that the model's email address should be unverified.
      */
+    /**
+     * Starts the user with credits, recorded through the ledger like a real purchase.
+     */
+    public function withCredits(string $amount = '10'): static
+    {
+        return $this->afterCreating(fn (User $user) => app(CreditLedger::class)->purchase($user, $amount, (string) Str::uuid()));
+    }
+
     public function unverified(): static
     {
         return $this->state(fn (array $attributes) => [

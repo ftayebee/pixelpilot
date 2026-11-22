@@ -4,6 +4,8 @@ namespace App\Services\Generations;
 
 use App\Models\Generation;
 use App\Models\User;
+use App\Services\Credits\CreditLedger;
+use App\Services\Credits\InsufficientCredits;
 use App\Services\Pricing\Estimate;
 use App\Services\Pricing\PricingCatalog;
 use App\Services\Pricing\PricingService;
@@ -21,11 +23,14 @@ class GenerationCreator
     public function __construct(
         private readonly PricingCatalog $catalog,
         private readonly PricingService $pricing,
+        private readonly CreditLedger $credits,
     ) {}
 
     /**
      * @param  array{prompt: string, size: string, quality: string, reference_images: list<string>, client_request_id: string}  $input
      * @return array{generation: Generation, created: bool}
+     *
+     * @throws InsufficientCredits
      */
     public function create(User $user, array $input): array
     {
@@ -44,19 +49,26 @@ class GenerationCreator
         );
 
         try {
-            // Own transaction (a savepoint when nested) so a unique violation can be recovered from.
-            $generation = DB::transaction(fn () => $user->generations()->create([
-                'uuid' => (string) Str::uuid(),
-                'idempotency_key' => (string) Str::uuid(),
-                'client_request_id' => $input['client_request_id'],
-                'prompt' => $input['prompt'],
-                'size' => $input['size'],
-                'quality' => $input['quality'],
-                'reference_images' => array_values($input['reference_images']),
-                // If the request dies before submitting, the poller picks this up.
-                'next_poll_at' => now()->addMinutes(2),
-                ...$this->estimateAttributes($estimate),
-            ]));
+            // One transaction: the generation only exists if its credits were reserved.
+            // (A savepoint when nested, so a unique violation can be recovered from.)
+            $generation = DB::transaction(function () use ($user, $input, $estimate) {
+                $generation = $user->generations()->create([
+                    'uuid' => (string) Str::uuid(),
+                    'idempotency_key' => (string) Str::uuid(),
+                    'client_request_id' => $input['client_request_id'],
+                    'prompt' => $input['prompt'],
+                    'size' => $input['size'],
+                    'quality' => $input['quality'],
+                    'reference_images' => array_values($input['reference_images']),
+                    // If the request dies before submitting, the poller picks this up.
+                    'next_poll_at' => now()->addMinutes(2),
+                    ...$this->estimateAttributes($estimate),
+                ]);
+
+                $this->credits->reserve($generation, $estimate->chargeMax);
+
+                return $generation;
+            });
         } catch (UniqueConstraintViolationException) {
             // A concurrent request with the same client token won the race.
             return ['generation' => $this->findByClientRequest($user, $input['client_request_id']), 'created' => false];

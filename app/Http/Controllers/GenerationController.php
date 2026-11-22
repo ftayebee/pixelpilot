@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreGenerationRequest;
 use App\Models\Generation;
+use App\Services\Credits\InsufficientCredits;
 use App\Services\Dashboard\GenerationPresenter;
 use App\Services\Generations\GenerationCreator;
 use App\Services\Generations\GenerationSubmitter;
@@ -76,7 +77,11 @@ class GenerationController extends Controller
 
     public function store(StoreGenerationRequest $request, GenerationCreator $creator, GenerationSubmitter $submitter): RedirectResponse
     {
-        ['generation' => $generation, 'created' => $created] = $creator->create($request->user(), $request->validated());
+        try {
+            ['generation' => $generation, 'created' => $created] = $creator->create($request->user(), $request->validated());
+        } catch (InsufficientCredits $e) {
+            return back()->withErrors(['credits' => $e->getMessage()]);
+        }
 
         if (! $created) {
             return redirect()->route('generations.show', $generation);

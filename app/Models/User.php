@@ -11,8 +11,9 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 /**
- * is_admin is deliberately not fillable: admins are promoted with
- * `php artisan pixelpilot:make-admin`, never through a request.
+ * is_admin and credit_balance are deliberately not fillable. Admins are
+ * promoted with `php artisan pixelpilot:make-admin`, and credits only change
+ * through App\Services\Credits\CreditLedger.
  */
 #[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'remember_token'])]
@@ -23,6 +24,7 @@ class User extends Authenticatable
 
     protected $attributes = [
         'is_admin' => false,
+        'credit_balance' => '0',
     ];
 
     protected function casts(): array
