@@ -4,7 +4,7 @@ import { computed } from 'vue';
 const props = defineProps<{ status: string }>();
 
 const styles: Record<string, { label: string; className: string; pulse?: boolean }> = {
-    submitting: { label: 'Submitting', className: 'bg-canvas text-muted', pulse: true },
+    submitting: { label: 'Queued', className: 'bg-warning-soft text-[#b46f00]', pulse: true },
     queued: { label: 'Queued', className: 'bg-warning-soft text-[#b46f00]', pulse: true },
     processing: { label: 'Processing', className: 'bg-brand-50 text-brand-700', pulse: true },
     succeeded: { label: 'Succeeded', className: 'bg-success-soft text-success' },

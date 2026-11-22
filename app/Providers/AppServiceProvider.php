@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Services\Pixelforge\PixelforgeClient;
+use App\Services\Pricing\PricingService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
@@ -19,6 +20,10 @@ class AppServiceProvider extends ServiceProvider
             connectTimeout: config('pixelforge.connect_timeout'),
             maxAttempts: config('pixelforge.retries.max_attempts'),
             maxRetryWait: config('pixelforge.retries.max_wait_seconds'),
+        ));
+
+        $this->app->singleton(PricingService::class, fn () => new PricingService(
+            markup: (string) config('pixelforge.markup_multiplier'),
         ));
     }
 
