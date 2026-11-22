@@ -17,7 +17,7 @@ Each milestone is implemented, tested and pushed before the next one starts.
 | 11 | Reliable webhook processing | Done |
 | 12 | Polling fallback | Done |
 | 13 | Generation and pricing tests | Done |
-| 14 | Webhook and failure tests | Pending |
+| 14 | Webhook and failure tests | Done (live keyword run pending API key) |
 | 15 | Admin usage report (stretch) | Pending |
 | 16 | Credit balances (stretch) | Pending |
 | 17 | Setup and deployment guide | Pending |

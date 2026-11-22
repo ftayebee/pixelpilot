@@ -97,7 +97,7 @@ class WebhookInbox
         $id = $data['id'] ?? null;
         $type = $data['type'] ?? null;
 
-        if (! is_string($id) || ! preg_match('/^evt_[A-Za-z0-9]{1,200}$/', $id)) {
+        if (! is_string($id) || ! preg_match('/^evt_[A-Za-z0-9_-]{1,200}$/', $id)) {
             throw new InvalidArgumentException('Event id is missing or malformed.');
         }
 
