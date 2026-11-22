@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GenerationController;
 use App\Http\Controllers\GenerationHistoryController;
@@ -29,6 +30,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/generations', [GenerationHistoryController::class, 'index'])->name('generations.index');
     Route::get('/generations/{generation}', [GenerationController::class, 'show'])->name('generations.show');
     Route::get('/generations/{generation}/image', [GenerationHistoryController::class, 'image'])->name('generations.image');
+
+    Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
+        Route::post('/analytics/sync', [AnalyticsController::class, 'sync'])->middleware('throttle:6,1')->name('analytics.sync');
+    });
 
     Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
     Route::patch('/settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.profile');

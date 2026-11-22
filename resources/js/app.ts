@@ -9,15 +9,16 @@ const appName = import.meta.env.VITE_APP_NAME || 'PixelPilot';
 
 createInertiaApp({
     title: (title) => (title ? `${title} · ${appName}` : appName),
-    resolve: (name) => {
-        const pages = import.meta.glob<DefineComponent>('./pages/**/*.vue', { eager: true });
-        const page = pages[`./pages/${name}.vue`];
+    // Pages are split into their own chunks and loaded on first visit.
+    resolve: async (name) => {
+        const pages = import.meta.glob<DefineComponent>('./pages/**/*.vue');
+        const load = pages[`./pages/${name}.vue`];
 
-        if (!page) {
+        if (!load) {
             throw new Error(`Page not found: ${name}`);
         }
 
-        return page;
+        return load();
     },
     setup({ el, App, props, plugin }) {
         createApp({ render: () => h(App, props) })
