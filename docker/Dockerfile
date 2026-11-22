@@ -23,15 +23,15 @@ FROM php:8.5-fpm-alpine AS app
 COPY --from=mlocati/php-extension-installer:2 /usr/bin/install-php-extensions /usr/local/bin/
 RUN install-php-extensions pdo_pgsql bcmath intl zip opcache pcntl
 
-COPY docker/php.ini /usr/local/etc/php/conf.d/zz-pixelpilot.ini
-COPY docker/entrypoint.sh /usr/local/bin/pixelpilot-entrypoint
+COPY --chmod=644 docker/php.ini /usr/local/etc/php/conf.d/zz-pixelpilot.ini
+# Readable and executable by www-data, which runs the worker and scheduler.
+COPY --chmod=755 docker/entrypoint.sh /usr/local/bin/pixelpilot-entrypoint
 
 WORKDIR /var/www/html
 COPY --from=vendor --chown=www-data:www-data /app /var/www/html
 COPY --from=assets --chown=www-data:www-data /app/public/build /var/www/html/public/build
 
-RUN chmod +x /usr/local/bin/pixelpilot-entrypoint \
-    && rm -rf tests docker deploy .env* \
+RUN rm -rf tests docker deploy .env* \
     && mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views storage/logs \
     && chown -R www-data:www-data storage bootstrap/cache
 
