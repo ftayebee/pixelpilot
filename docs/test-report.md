@@ -15,9 +15,10 @@ The suite runs against **real PostgreSQL**, not SQLite, so row locks, `SKIP LOCK
 
 | | |
 |---|---|
-| Tests | 194 passed, 0 failed |
-| Assertions | 21,025 |
-| Duration | ~20 s |
+| Tests | 196 passed, 0 failed |
+| Assertions | 21,033 |
+| Duration | ~20–30 s |
+| Dependencies | `composer audit` and `npm audit`: no advisories |
 | Style | Pint: passed |
 | Types | vue-tsc: no errors |
 
@@ -39,6 +40,10 @@ The suite runs against **real PostgreSQL**, not SQLite, so row locks, `SKIP LOCK
 | Webhook storage and processing | `Webhooks\WebhookProcessingTest` |
 | Polling fallback | `Generations\PollingTest` |
 | Assessment failure scenarios | `Scenarios\FailureScenariosTest`, `Scenarios\ConcurrencyTest` |
+| Admin report and `/v1/usage` reconciliation | `Admin\AnalyticsTest` |
+| Credits: purchase, reserve, settle, release, shortfall, ledger integrity | `Credits\CreditsTest` |
+| Admin route names not exposed to members | `ExposedRoutesTest` |
+| Health endpoint doesn't leak configuration | `HealthCheckTest` |
 
 ## Assessment scenarios
 
