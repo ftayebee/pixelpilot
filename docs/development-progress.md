@@ -13,7 +13,7 @@ Each milestone is implemented, tested and pushed before the next one starts.
 | 7 | Image generation workflow | Done |
 | 8 | Pricing engine | Done |
 | 9 | Generation history | Done |
-| 10 | Webhook signature verification | Pending |
+| 10 | Webhook signature verification | Done |
 | 11 | Reliable webhook processing | Pending |
 | 12 | Polling fallback | Pending |
 | 13 | Generation and pricing tests | Pending |

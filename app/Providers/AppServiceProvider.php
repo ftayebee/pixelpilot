@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Services\Pixelforge\PixelforgeClient;
+use App\Services\Pixelforge\Webhooks\PixelforgeWebhookVerifier;
 use App\Services\Pricing\PricingService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\URL;
@@ -20,6 +21,11 @@ class AppServiceProvider extends ServiceProvider
             connectTimeout: config('pixelforge.connect_timeout'),
             maxAttempts: config('pixelforge.retries.max_attempts'),
             maxRetryWait: config('pixelforge.retries.max_wait_seconds'),
+        ));
+
+        $this->app->bind(PixelforgeWebhookVerifier::class, fn () => new PixelforgeWebhookVerifier(
+            secret: config('pixelforge.webhook_secret'),
+            toleranceSeconds: config('pixelforge.webhook_tolerance'),
         ));
 
         $this->app->singleton(PricingService::class, fn () => new PricingService(
