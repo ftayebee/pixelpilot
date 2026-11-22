@@ -17,7 +17,7 @@ Each milestone was implemented, tested and pushed before the next one started.
 | 11 | Reliable webhook processing | Done |
 | 12 | Polling fallback | Done |
 | 13 | Generation and pricing tests | Done |
-| 14 | Webhook and failure tests | Done (live keyword run pending API key) |
+| 14 | Webhook and failure tests | Done (live run verified) |
 | 15 | Admin usage report (stretch) | Done |
 | 16 | Credit balances (stretch) | Done |
 | 17 | Setup and deployment guide | Done |
@@ -43,7 +43,7 @@ Each milestone was implemented, tested and pushed before the next one started.
 | Generation idempotency, rate-limit handling, concurrency protection | ✅ |
 | Tests passing | ✅ 196 tests |
 | Commits separated by feature | ✅ 18 milestone commits |
-| Live keyword smoke test | ⏳ `php artisan pixelforge:smoke` ready; needs `PIXELFORGE_API_KEY` |
+| Live keyword smoke test | ✅ all six keywords pass; costs match `/v1/usage` exactly |
 
 | Stretch | Status |
 |---|---|

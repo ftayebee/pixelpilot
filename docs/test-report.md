@@ -74,6 +74,21 @@ The suite runs against **real PostgreSQL**, not SQLite, so row locks, `SKIP LOCK
 |---|---|
 | `GET /v1/pricing` returns the documented rates and token tables, parsed by `PixelforgeClient::pricing()` | Verified 2026-11-22 |
 | Invalid key → `401 invalid_api_key` with the documented error shape, mapped to a non-retryable `PixelforgeException` | Verified 2026-11-22 |
-| Keyword smoke test with a real key (`php artisan pixelforge:smoke <email>`) | Pending: needs the environment's Pixelforge API key |
+| Real signed webhook (dashboard "Send test event") through a Cloudflare tunnel | Verified 2026-11-22: HTTP 204 on attempt #1, signature accepted, stored as `ignored` (ping) |
+| Keyword smoke test with a real key | Verified 2026-11-22, all six keywords pass (below) |
+| Our provider cost vs `GET /v1/usage` for the key | Verified 2026-11-22: exact match, $0.043005000 vs $0.043005000, 3 vs 3 billed generations |
 
-`pixelforge:smoke` sends `[succeed]`, `[fail]`, `[blocked]`, `[overloaded]` and `[duplicate]` (add `slow` with `--keywords`) through the real app path: estimate, submit, webhook or poll, charge. For each it checks that a success has exactly one charge row, that charge = cost × 1.25, and that the charge sits inside the estimate; and that a failure is free with no charge row.
+`pixelforge:smoke` sends each keyword through the real app path (estimate, credit reservation, submit, webhook or poll, charge). For each success it checks that there's exactly one charge row, that charge = cost × 1.25, and that the charge sits inside the estimate; for each failure it checks that it's free with no charge row.
+
+Live run, local key, webhooks delivered through a tunnel with a queue worker running:
+
+| Keyword | Submission | Final status | Error | Charged | Checks |
+|---|---|---|---|---|---|
+| `[succeed]` | accepted | succeeded | — | $0.020365625 | ok |
+| `[fail]` | accepted | failed | `generation_failed` | $0 | ok |
+| `[blocked]` | rejected (400) | failed | `content_policy_violation` | $0 | ok |
+| `[overloaded]` | 503 on every attempt; retried up to the cap | failed | `overloaded` | $0 | ok |
+| `[duplicate]` | accepted | succeeded | — | $0.01805625 | ok |
+| `[slow]` | accepted | succeeded (after 60–90 s) | — | $0.015334375 | ok |
+
+Webhook log for the run: 3 `generation.succeeded` events arrived in 4 deliveries and 4 `generation.processing` events in 5. The duplicates were stored once, and the run produced exactly 3 charge rows for 3 successes. Users were charged $0.05375625 in total against $0.043005 of Pixelforge cost: $0.01075125 profit, exactly 25%.
