@@ -12,7 +12,7 @@ Each milestone is implemented, tested and pushed before the next one starts.
 | 6 | Pixelforge API client | Done |
 | 7 | Image generation workflow | Done |
 | 8 | Pricing engine | Done |
-| 9 | Generation history | Pending |
+| 9 | Generation history | Done |
 | 10 | Webhook signature verification | Pending |
 | 11 | Reliable webhook processing | Pending |
 | 12 | Polling fallback | Pending |

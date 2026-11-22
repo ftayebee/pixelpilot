@@ -3,6 +3,7 @@
 namespace App\Services\Dashboard;
 
 use App\Models\Generation;
+use App\Services\Generations\GenerationImages;
 use App\Support\Money;
 
 /**
@@ -11,6 +12,8 @@ use App\Support\Money;
  */
 class GenerationPresenter
 {
+    public function __construct(private readonly GenerationImages $images) {}
+
     /**
      * @return array<string, mixed>
      */
@@ -65,17 +68,9 @@ class GenerationPresenter
         ];
     }
 
-    /**
-     * The provider URL expires 24h after completion; after that the frontend
-     * shows a fallback instead of a broken image.
-     */
     public function imageUrl(Generation $generation): ?string
     {
-        if ($generation->image_url && $generation->image_url_expires_at?->isFuture()) {
-            return $generation->image_url;
-        }
-
-        return null;
+        return $this->images->url($generation);
     }
 
     private function money(?string $amount): ?string

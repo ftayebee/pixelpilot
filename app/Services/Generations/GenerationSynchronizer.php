@@ -3,6 +3,7 @@
 namespace App\Services\Generations;
 
 use App\Enums\GenerationStatus;
+use App\Jobs\StoreGenerationImage;
 use App\Models\Generation;
 use App\Services\Pixelforge\Data\ProviderGeneration;
 use App\Services\Pricing\ChargeRecorder;
@@ -24,7 +25,10 @@ use Illuminate\Support\Facades\Log;
  */
 class GenerationSynchronizer
 {
-    public function __construct(private readonly ChargeRecorder $charges) {}
+    public function __construct(
+        private readonly ChargeRecorder $charges,
+        private readonly GenerationImages $images,
+    ) {}
 
     /**
      * @return bool whether anything changed
@@ -50,6 +54,10 @@ class GenerationSynchronizer
             $next = $snapshot->status;
 
             if ($current->canTransitionTo($next)) {
+                if ($next === GenerationStatus::Succeeded && $this->images->shouldStore()) {
+                    StoreGenerationImage::dispatch($locked->id)->afterCommit();
+                }
+
                 match ($next) {
                     GenerationStatus::Queued => null,
                     GenerationStatus::Processing => $locked->started_at ??= $snapshot->startedAt,
