@@ -5,6 +5,7 @@ import { formatUsd } from '@/lib/format';
 import { Link, usePage } from '@inertiajs/vue3';
 import { ChartNoAxesCombined, GalleryVerticalEnd, LayoutGrid, Settings, Sparkles, WalletCards, X } from 'lucide-vue-next';
 import type { Component } from 'vue';
+import type { Config } from 'ziggy-js';
 import { computed } from 'vue';
 
 defineEmits<{ close: [] }>();
@@ -49,11 +50,19 @@ const sections = computed<NavSection[]>(() => {
         });
     }
 
-    // Only show destinations that exist, so the menu never links to a dead page.
+    // Only show destinations this user's route list contains, so the menu never links to a dead page.
     return all
-        .map((section) => ({ ...section, items: section.items.filter((item) => route().has(item.route)) }))
+        .map((section) => ({ ...section, items: section.items.filter((item) => route(undefined, undefined, undefined, routes.value).has(item.route)) }))
         .filter((section) => section.items.length > 0);
 });
+
+// Read from this page's props rather than the global list, which is only
+// refreshed after the page has rendered.
+const routes = computed(() => page.props.ziggy as Config);
+
+function hrefFor(item: NavItem) {
+    return route(item.route, undefined, undefined, routes.value);
+}
 
 function isActive(item: NavItem) {
     return item.activePattern.split('|').some((pattern) => route().current(pattern));
@@ -75,7 +84,7 @@ function isActive(item: NavItem) {
                 <ul class="mt-2 space-y-0.5">
                     <li v-for="item in section.items" :key="item.route">
                         <Link
-                            :href="route(item.route)"
+                            :href="hrefFor(item)"
                             class="group flex items-center gap-3 rounded-[var(--radius-control)] px-3 py-2.5 text-sm font-medium transition-colors"
                             :class="isActive(item) ? 'bg-brand-600 text-white shadow-sm shadow-brand-600/25' : 'text-muted hover:bg-canvas hover:text-ink'"
                             :aria-current="isActive(item) ? 'page' : undefined"

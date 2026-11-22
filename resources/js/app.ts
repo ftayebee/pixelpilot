@@ -1,9 +1,16 @@
 import '../css/app.css';
 
-import { createInertiaApp } from '@inertiajs/vue3';
+import { createInertiaApp, router } from '@inertiajs/vue3';
 import type { DefineComponent } from 'vue';
 import { createApp, h } from 'vue';
 import { ZiggyVue } from 'ziggy-js';
+
+// Keep the global route list in step with the server's role-scoped one after
+// Inertia visits (e.g. signing in as an admin), not just the first page load.
+router.on('navigate', (event) => {
+    const ziggy = event.detail.page.props.ziggy;
+    if (ziggy) (globalThis as unknown as { Ziggy: unknown }).Ziggy = ziggy;
+});
 
 const appName = import.meta.env.VITE_APP_NAME || 'PixelPilot';
 

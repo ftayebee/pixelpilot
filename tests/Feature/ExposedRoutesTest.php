@@ -32,4 +32,19 @@ class ExposedRoutesTest extends TestCase
         $this->assertStringContainsString('"admin.analytics"', $html);
         $this->assertStringNotContainsString('"webhooks.pixelforge"', $html);
     }
+
+    public function test_route_list_follows_the_user_on_inertia_visits(): void
+    {
+        // Signing in is an Inertia visit, not a page load, so the role-scoped
+        // list must also arrive as a prop on every response.
+        $admin = User::factory()->create();
+        $admin->forceFill(['is_admin' => true])->save();
+        $member = User::factory()->create();
+        $adminRoutes = $this->actingAs($admin)->get('/dashboard')->viewData('page')['props']['ziggy']['routes'];
+        $memberRoutes = $this->actingAs($member)->get('/dashboard')->viewData('page')['props']['ziggy']['routes'];
+
+        $this->assertArrayHasKey('admin.analytics', $adminRoutes);
+        $this->assertArrayNotHasKey('admin.analytics', $memberRoutes);
+        $this->assertArrayNotHasKey('webhooks.pixelforge', $memberRoutes);
+    }
 }

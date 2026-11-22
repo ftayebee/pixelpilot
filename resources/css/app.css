@@ -44,7 +44,7 @@
     }
 
     body {
-        background: var(--color-lavender);
+        background: var(--color-canvas);
     }
 
     :focus-visible {

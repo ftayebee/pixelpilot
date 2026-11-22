@@ -24,8 +24,8 @@ onBeforeUnmount(removeListener);
 </script>
 
 <template>
-    <div class="min-h-dvh lg:p-4">
-        <div class="flex min-h-dvh bg-white lg:h-[calc(100dvh-2rem)] lg:min-h-0 lg:overflow-hidden lg:rounded-[28px] lg:shadow-[var(--shadow-shell)]">
+    <div class="min-h-dvh">
+        <div class="flex min-h-dvh bg-white lg:h-dvh lg:min-h-0 lg:overflow-hidden">
             <!-- Desktop sidebar -->
             <aside class="hidden w-60 shrink-0 border-r border-line lg:block">
                 <AppSidebar />
@@ -45,7 +45,7 @@ onBeforeUnmount(removeListener);
 
             <div class="flex min-w-0 flex-1 flex-col">
                 <AppHeader @open-menu="menuOpen = true" />
-                <main class="flex-1 bg-canvas lg:m-2 lg:overflow-y-auto lg:rounded-[22px]">
+                <main class="flex-1 bg-canvas lg:overflow-y-auto">
                     <div class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
                         <slot />
                     </div>
