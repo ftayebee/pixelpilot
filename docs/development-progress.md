@@ -8,7 +8,7 @@ Each milestone is implemented, tested and pushed before the next one starts.
 | 2 | Environment, PostgreSQL, Pixelforge config, health check | Done |
 | 3 | User authentication | Done |
 | 4 | Dashboard layout and navigation | Done |
-| 5 | Dashboard overview | Pending |
+| 5 | Dashboard overview | Done |
 | 6 | Pixelforge API client | Pending |
 | 7 | Image generation workflow | Pending |
 | 8 | Pricing engine | Pending |

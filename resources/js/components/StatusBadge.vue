@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
-export type GenerationStatus = 'submitting' | 'queued' | 'processing' | 'succeeded' | 'failed';
-
-const props = defineProps<{ status: GenerationStatus | string }>();
+const props = defineProps<{ status: string }>();
 
 const styles: Record<string, { label: string; className: string; pulse?: boolean }> = {
     submitting: { label: 'Submitting', className: 'bg-canvas text-muted', pulse: true },
