@@ -54,6 +54,31 @@ sudo crontab -u www-data deploy/crontab
 
 Subsequent deploys: `APP_DIR=/var/www/pixelpilot bash deploy/deploy.sh`. It runs `migrate --force` (never `migrate:fresh`), rebuilds caches and restarts the workers.
 
+## Docker on a server with Traefik
+
+This is how https://pixelpilot.boigharbd.com runs: a separate Compose project on a VPS that already serves other sites through Traefik. Nothing outside the project is changed; routing and the Let's Encrypt certificate come from labels on the `web` container.
+
+| Service | Image | Role |
+|---|---|---|
+| `app` | `pixelpilot-app` (PHP 8.5 FPM) | Web requests; caches config, routes, views and events on start |
+| `worker` | same | `queue:work`, runs as `www-data` |
+| `scheduler` | same | `schedule:work`, runs as `www-data` |
+| `web` | `pixelpilot-web` (Nginx) | Static assets, FastCGI to `app`, Traefik labels |
+| `db` | `postgres:17-alpine` | Data, on the `pgdata` volume |
+
+First install, after pointing the subdomain's A record at the server:
+
+```bash
+git clone https://github.com/ftayebee/pixelpilot.git /opt/pixelpilot && cd /opt/pixelpilot
+bash deploy/docker/install.sh pixelpilot.example.com   # creates .env with a fresh APP_KEY and DB password
+# add PIXELFORGE_API_KEY and PIXELFORGE_WEBHOOK_SECRET to .env, then:
+docker compose -f docker-compose.prod.yml up -d --force-recreate
+```
+
+Updates: `bash deploy/docker/deploy.sh` (pull, build, migrate, restart). Config is cached when a container starts, so after editing `.env` recreate the containers with `--force-recreate`.
+
+The Traefik labels assume an entrypoint named `websecure` and a certificate resolver named `letsencrypt`; adjust them to match your Traefik. If the DNS record is created after the stack starts, recreate `web` so Traefik requests the certificate again.
+
 ## Production `.env`
 
 ```dotenv

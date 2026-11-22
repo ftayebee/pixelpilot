@@ -6,6 +6,8 @@ Create, manage and track AI-generated images with transparent pricing. PixelPilo
 
 Built for the PromptEdit Senior Product Engineer take-home assessment.
 
+**Live:** https://pixelpilot.boigharbd.com (register to try it; "Buy credits" adds free test credits).
+
 ![Generate page](docs/screenshots/generate.jpg)
 
 | Sign in | Credits (mobile) |
@@ -153,6 +155,8 @@ What's covered and how each assessment scenario is tested: [docs/test-report.md]
 ## Production deployment
 
 Step-by-step VPS/Forge instructions, a production `.env`, Nginx and Supervisor configs, cron and a deploy script are in [docs/deployment.md](docs/deployment.md) and [`deploy/`](deploy/). In short: PHP-FPM + Nginx with HTTPS, PostgreSQL, a Supervisor-managed `queue:work`, the scheduler cron, `php artisan migrate --force` on deploy, and a **separate** Pixelforge key for production.
+
+The live instance runs the Docker stack instead (`docker/`, `docker-compose.prod.yml`, `deploy/docker/`): PHP-FPM, Nginx, a queue worker, the scheduler and PostgreSQL in containers, behind the server's existing Traefik for HTTPS. See [Docker on a server with Traefik](docs/deployment.md#docker-on-a-server-with-traefik).
 
 ## Admin user
 

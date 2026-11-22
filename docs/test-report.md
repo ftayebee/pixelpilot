@@ -77,6 +77,8 @@ The suite runs against **real PostgreSQL**, not SQLite, so row locks, `SKIP LOCK
 | Real signed webhook (dashboard "Send test event") through a Cloudflare tunnel | Verified 2026-11-22: HTTP 204 on attempt #1, signature accepted, stored as `ignored` (ping) |
 | Keyword smoke test with a real key | Verified 2026-11-22, all six keywords pass (below) |
 | Our provider cost vs `GET /v1/usage` for the key | Verified 2026-11-22: exact match, $0.043005000 vs $0.043005000, 3 vs 3 billed generations |
+| Production (https://pixelpilot.boigharbd.com, its own key): signed test events from the dashboard | Verified 2026-11-22: HTTP 204 |
+| Production keyword smoke test, webhooks and reconciliation | Verified 2026-11-22, all six keywords pass; admin report shows "Matches Pixelforge" (below) |
 
 `pixelforge:smoke` sends each keyword through the real app path (estimate, credit reservation, submit, webhook or poll, charge). For each success it checks that there's exactly one charge row, that charge = cost × 1.25, and that the charge sits inside the estimate; for each failure it checks that it's free with no charge row.
 
@@ -92,3 +94,18 @@ Live run, local key, webhooks delivered through a tunnel with a queue worker run
 | `[slow]` | accepted | succeeded (after 60–90 s) | — | $0.015334375 | ok |
 
 Webhook log for the run: 3 `generation.succeeded` events arrived in 4 deliveries and 4 `generation.processing` events in 5. The duplicates were stored once, and the run produced exactly 3 charge rows for 3 successes. Users were charged $0.05375625 in total against $0.043005 of Pixelforge cost: $0.01075125 profit, exactly 25%.
+
+### Production run
+
+Same command inside the `app` container on the live server, with the production key and webhooks delivered straight to `https://pixelpilot.boigharbd.com/webhooks/pixelforge`:
+
+| Keyword | Submission | Final status | Error | Charged | Pixelforge id | Checks |
+|---|---|---|---|---|---|---|
+| `[succeed]` | accepted | succeeded | — | $0.015971875 | `gen_01M8282VNPMSX4QSD5QNW5FWP1` | ok |
+| `[fail]` | accepted | failed | `generation_failed` | $0 | `gen_01M8283PPAYF5M3H1M5X99QFAS` | ok |
+| `[blocked]` | rejected (400) | failed | `content_policy_violation` | $0 | — | ok |
+| `[overloaded]` | 503 on every attempt; retried up to the cap | failed | `overloaded` | $0 | — | ok |
+| `[duplicate]` | accepted | succeeded | — | $0.01418125 | `gen_01M8285ZXRHYK7R53BRS3K979Y` | ok |
+| `[slow]` | accepted | succeeded | — | $0.017575 | `gen_01M8286AT8E1SQ1ZZ2VKJQ4A2V` | ok |
+
+Webhooks received: 3 `generation.succeeded`, 1 `generation.failed`, 4 `generation.processing` and 2 pings, all processed. After `pixelforge:sync-usage`, `/admin/analytics` shows our provider cost $0.0381825 against $0.0381825 from `GET /v1/usage`, 3 of 3 billed generations: "Matches Pixelforge". Users were charged $0.047728125, so profit is $0.009545625, exactly 25%.
