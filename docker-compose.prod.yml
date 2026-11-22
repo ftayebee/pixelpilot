@@ -1,0 +1,80 @@
+# Production stack for a server that already runs Traefik (Docker provider,
+# "websecure" entrypoint, "letsencrypt" resolver). Everything sits on a
+# private network; only Traefik talks to the web container.
+#
+#   cp deploy/docker/env.production.example .env   (then fill it in)
+#   docker compose -f docker-compose.prod.yml up -d --build
+#   docker compose -f docker-compose.prod.yml exec app php artisan migrate --force
+
+name: pixelpilot
+
+x-app: &app
+  image: pixelpilot-app:latest
+  env_file: .env
+  restart: unless-stopped
+  volumes:
+    - storage:/var/www/html/storage
+  networks: [internal]
+  depends_on:
+    db:
+      condition: service_healthy
+
+services:
+  app:
+    <<: *app
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      target: app
+
+  worker:
+    <<: *app
+    user: www-data
+    command: ["php", "artisan", "queue:work", "--sleep=1", "--max-time=3600", "--timeout=90"]
+    stop_grace_period: 120s
+
+  scheduler:
+    <<: *app
+    user: www-data
+    command: ["php", "artisan", "schedule:work"]
+
+  web:
+    image: pixelpilot-web:latest
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      target: web
+    restart: unless-stopped
+    depends_on: [app]
+    networks: [internal]
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=pixelpilot_internal
+      - traefik.http.routers.pixelpilot.rule=Host(`${APP_HOST:?set APP_HOST in .env}`)
+      - traefik.http.routers.pixelpilot.entrypoints=websecure
+      - traefik.http.routers.pixelpilot.tls.certresolver=letsencrypt
+      - traefik.http.services.pixelpilot.loadbalancer.server.port=8080
+
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks: [internal]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+networks:
+  internal:
+    name: pixelpilot_internal
+
+volumes:
+  storage:
+  pgdata:
