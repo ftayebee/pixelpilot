@@ -9,7 +9,7 @@ Each milestone is implemented, tested and pushed before the next one starts.
 | 3 | User authentication | Done |
 | 4 | Dashboard layout and navigation | Done |
 | 5 | Dashboard overview | Done |
-| 6 | Pixelforge API client | Pending |
+| 6 | Pixelforge API client | Done |
 | 7 | Image generation workflow | Pending |
 | 8 | Pricing engine | Pending |
 | 9 | Generation history | Pending |
