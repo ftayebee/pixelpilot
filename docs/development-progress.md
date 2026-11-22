@@ -16,7 +16,7 @@ Each milestone is implemented, tested and pushed before the next one starts.
 | 10 | Webhook signature verification | Done |
 | 11 | Reliable webhook processing | Done |
 | 12 | Polling fallback | Done |
-| 13 | Generation and pricing tests | Pending |
+| 13 | Generation and pricing tests | Done |
 | 14 | Webhook and failure tests | Pending |
 | 15 | Admin usage report (stretch) | Pending |
 | 16 | Credit balances (stretch) | Pending |

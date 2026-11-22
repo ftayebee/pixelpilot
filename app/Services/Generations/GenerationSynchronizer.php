@@ -48,6 +48,15 @@ class GenerationSynchronizer
                 return false;
             }
 
+            if ($locked->provider_generation_id === null && Generation::where('provider_generation_id', $snapshot->id)->exists()) {
+                Log::error('Pixelforge id already belongs to another generation; snapshot ignored.', [
+                    'generation' => $locked->uuid,
+                    'source' => $source,
+                ]);
+
+                return false;
+            }
+
             $changed = $this->link($locked, $snapshot);
 
             $current = $locked->status;
