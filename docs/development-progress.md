@@ -6,7 +6,7 @@ Each milestone is implemented, tested and pushed before the next one starts.
 |---|-----------|--------|
 | 1 | Initialize project (Laravel 13, Inertia 3, Vue 3 + TS, Tailwind 4) | Done |
 | 2 | Environment, PostgreSQL, Pixelforge config, health check | Done |
-| 3 | User authentication | Pending |
+| 3 | User authentication | Done |
 | 4 | Dashboard layout and navigation | Pending |
 | 5 | Dashboard overview | Pending |
 | 6 | Pixelforge API client | Pending |

@@ -6,6 +6,7 @@
         <meta name="description" content="Create, manage and track AI-generated images with transparent pricing.">
         <link rel="icon" href="/favicon.svg" type="image/svg+xml">
         <title inertia>{{ config('app.name', 'PixelPilot') }}</title>
+        @routes
         @vite(['resources/css/app.css', 'resources/js/app.ts'])
         @inertiaHead
     </head>
