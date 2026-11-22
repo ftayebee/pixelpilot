@@ -20,7 +20,7 @@ Each milestone is implemented, tested and pushed before the next one starts.
 | 14 | Webhook and failure tests | Done (live keyword run pending API key) |
 | 15 | Admin usage report (stretch) | Done |
 | 16 | Credit balances (stretch) | Done |
-| 17 | Setup and deployment guide | Pending |
+| 17 | Setup and deployment guide | Done |
 | 18 | Final production checks | Pending |
 
 ## Environment notes

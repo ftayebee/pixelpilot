@@ -15,9 +15,9 @@ The suite runs against **real PostgreSQL**, not SQLite, so row locks, `SKIP LOCK
 
 | | |
 |---|---|
-| Tests | 171 passed, 0 failed |
-| Assertions | 20,857 |
-| Duration | ~15 s |
+| Tests | 194 passed, 0 failed |
+| Assertions | 21,025 |
+| Duration | ~20 s |
 | Style | Pint: passed |
 | Types | vue-tsc: no errors |
 

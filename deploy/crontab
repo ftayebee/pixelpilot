@@ -1,0 +1,3 @@
+# Laravel scheduler for PixelPilot (polling fallback, pending-webhook sweeper,
+# Pixelforge usage sync). Install for the web user:  sudo crontab -u www-data deploy/crontab
+* * * * * cd /var/www/pixelpilot && php artisan schedule:run >> /dev/null 2>&1
