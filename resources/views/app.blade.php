@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="Create, manage and track AI-generated images with transparent pricing.">
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+        <title inertia>{{ config('app.name', 'PixelPilot') }}</title>
+        @vite(['resources/css/app.css', 'resources/js/app.ts'])
+        @inertiaHead
+    </head>
+    <body class="font-sans antialiased">
+        @inertia
+    </body>
+</html>
